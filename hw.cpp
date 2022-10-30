@@ -167,6 +167,7 @@ bool contains(Node* node, stack<Node*> path) {
         if(equals(node->matrix, path.top()->matrix)) {
             return true;
         }
+        cout << path.size() <<endl;
         path.pop();
     }
     return false;
@@ -186,12 +187,14 @@ int search(stack<Node*> path, int g, int bound) {
     Node* node = path.top();
     cout << (node != nullptr) << " : " << g << " : " << bound << endl;
     visited->insert(path.top());
-    pathToGoal->push(path.top());
+
+    cout <<"Size: " <<path.size() <<endl;
+
     path.pop();
     int f = g + manhattan(node);
     if (f > bound) {
         return f;
-    }
+    } 
     if(isGoal(node)) {
         cout << "Number of steps: " << g << endl;
         return 0;
@@ -224,20 +227,21 @@ int search(stack<Node*> path, int g, int bound) {
             path.push(succ);
             int t = search(path,g+1, bound );
             if(t == 0 ) {
+                pathToGoal->push(path.top());
                 return t;
             }
             if(t < min) {
                 min = t;
-                visited->insert(path.top());
-                pathToGoal->pop();
-                path.pop();
-            } else {
-                pathToGoal->pop(); 
-            }
-       }
+            } 
+            visited->insert(path.top());
+            path.pop();
+
+       } 
     }
     if(min == INT32_MAX) {
-        pathToGoal->pop();
+        if(!pathToGoal->empty()) {
+                    pathToGoal->pop();
+                }
     }
     return min;
 }
@@ -251,7 +255,9 @@ int ida_star(Node* root) {
         visited = new set<Node*>();
         t = search(path, 0, bound);
         if(t == 0) {
+            pathToGoal->push(root);
             return 0;
+
         }
         bound = t;
     }
@@ -263,17 +269,24 @@ void printPath() {
     Node* prev = nullptr;
     do {
         prev = pathToGoal->top();
+            cout <<"------------------------------------------" <<endl;
+        for(int i = 0 ; i < rows; i++ ) {
+            for(int j = 0 ; j < rows; j++ ) {
+                cout << next->matrix[i][j] << " ";
+            }
+            cout << endl;
+        }
         if(pathToGoal->size() > 0) {
             pathToGoal->pop();
         }
         if(prev->zeroRow - next->zeroRow == -1) {
-            cout << "Up" << endl;
-        } else if(prev->zeroRow - next->zeroRow == 1) {
             cout << "DOWN" << endl;
+        } else if(prev->zeroRow - next->zeroRow == 1) {
+            cout << "Up" << endl;
         }else if(prev->zeroCol - next->zeroCol == -1) {
-            cout << "LEFT" << endl;
-        }else {
             cout << "RIGHT" << endl;
+        }else {
+            cout << "LEFT" << endl;
         }
         next = prev;
         
@@ -319,7 +332,7 @@ int main() {
     }
     if(isSolvable(matrix, emptyCurrentRow)) {
         ida_star(new Node(matrix, emptyCurrentRow, emptyCurrentCol,nullptr));
-        cout << endl;
+        cout << "Size of stack: " << pathToGoal->size()<<endl;
         printPath();
         /* while(!pathToGoal->empty()) {
             for(int i = 0; i < rows; i++){
