@@ -3,12 +3,14 @@
 #include <stack>
 #include <list>
 #include <set>
+#include <chrono>
 using namespace std;
 
 class Node {
     public:
         int** matrix;
         int zeroRow;
+
         int zeroCol;
         Node* parent;
 
@@ -23,6 +25,7 @@ class Node {
 int expectedEmptyRow;
 int expectedEmptyCol;
 int rows; 
+
 set<Node*>* visited = nullptr;
 stack<Node*>* pathToGoal = nullptr;
 
@@ -72,7 +75,6 @@ bool setContains(int** node) {
 
 list<Node*> neightours(Node* node) {
     int swap;
-    cout << (node != nullptr) <<endl;
     list<Node*> children;
     for(int posChange : {-1,1}) {
 
@@ -134,6 +136,7 @@ int countInversions(int** matrix) {
             }
         }
     }
+    delete array;
     return inversionsCount;
 }
 
@@ -162,17 +165,6 @@ bool isGoal(Node* node) {
     return true;
 }
 
-bool contains(Node* node, stack<Node*> path) {
-    while(!path.empty()) {
-        if(equals(node->matrix, path.top()->matrix)) {
-            return true;
-        }
-        cout << path.size() <<endl;
-        path.pop();
-    }
-    return false;
-}
-
 bool setContains(Node* node) {
     for( set<Node*>::iterator it = visited->begin(); it != visited->end(); ++it) {
         if(equals(node->matrix,(*it)->matrix)) {
@@ -183,12 +175,8 @@ bool setContains(Node* node) {
 }
 
 int search(stack<Node*> path, int g, int bound) {
-    cout << "G = " << g <<endl;
     Node* node = path.top();
-    cout << (node != nullptr) << " : " << g << " : " << bound << endl;
     visited->insert(path.top());
-
-    cout <<"Size: " <<path.size() <<endl;
 
     path.pop();
     int f = g + manhattan(node);
@@ -202,26 +190,7 @@ int search(stack<Node*> path, int g, int bound) {
     
     int min = INT32_MAX;
     list<Node*> children = neightours(node); 
- /*    cout << "---------Current Node--------------------"<<endl;
-     for(int i = 0; i < rows; i ++) {
-            for(int j = 0; j < rows;j ++) {
-                cout << node->matrix[i][j] << " ";
-            }
-            cout << endl;
-        }
-    cout << "-----------------------------"<<endl; */
 
-    cout << "Bound: "<< bound << endl;
-  /*   for(Node* x : children) {
-        cout << "Manhattan: " << manhattan(x) << endl;
-        for(int i = 0; i < rows; i ++) {
-            for(int j = 0; j < rows;j ++) {
-                cout << x->matrix[i][j] << " ";
-            }
-            cout << endl;
-        }
-        cout << "-----------------------------"<<endl;
-    } */
     for(Node* succ : children) {
         if(!setContains(succ)) {
             path.push(succ);
@@ -238,10 +207,11 @@ int search(stack<Node*> path, int g, int bound) {
 
        } 
     }
+
     if(min == INT32_MAX) {
         if(!pathToGoal->empty()) {
-                    pathToGoal->pop();
-                }
+            pathToGoal->pop();
+        }
     }
     return min;
 }
@@ -260,6 +230,8 @@ int ida_star(Node* root) {
 
         }
         bound = t;
+        delete pathToGoal;
+        delete visited;
     }
     return 0;
 }
@@ -331,19 +303,12 @@ int main() {
         }
     }
     if(isSolvable(matrix, emptyCurrentRow)) {
+        chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         ida_star(new Node(matrix, emptyCurrentRow, emptyCurrentCol,nullptr));
+        chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
         cout << "Size of stack: " << pathToGoal->size()<<endl;
         printPath();
-        /* while(!pathToGoal->empty()) {
-            for(int i = 0; i < rows; i++){
-                for(int j = 0 ; j < rows;j++) {
-                    cout << pathToGoal->top()->matrix[i][j];
-                }
-                cout << endl;
-            }
-            cout <<" ---------------------------------------- "<<endl;
-            pathToGoal->pop();
-        } */
     } else {
         cout << "Unsolvable matrix" <<endl;
     }
