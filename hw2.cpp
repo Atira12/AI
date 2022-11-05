@@ -41,7 +41,6 @@ int getColWithMaxConflicts() {
     int maxConflicts = 0;
     bool isTaken;
     int conflicts = 0;
-    srand(time(0));
     for(int i = 0 ; i < rows ; i++ ) {
         int queenRow = nQueens[i];
         conflicts = (queensPerRow[queenRow] - 1) + (queensPerD1[i - queenRow + (rows - 1)] - 1) + (queensPerD2[i + queenRow] - 1);
@@ -60,11 +59,10 @@ int getColWithMaxConflicts() {
 int getRowWithMinConflicts(int col) {
     int conflicts;
     int minRow = 0;
-    int minConflicts = INT32_MAX;
+    int minConflicts = rows;
     int queenRow = nQueens[col];
     bool isTaken;
 
-    srand(time(0));
 
     for(int row = 0; row < rows; row++) {
         if(row  == queenRow) {
@@ -84,11 +82,10 @@ int getRowWithMinConflicts(int col) {
     return minRow;
 }
 bool hasConflicts() {
-    int conflicts = 0;
+    int* queenRow = nullptr;
     for(int i = 0 ; i < rows ; i++) {
-        int queenRow = nQueens[i];
-        conflicts = (queensPerRow[queenRow] - 1) + (queensPerD1[i - queenRow + (rows - 1)] - 1) + (queensPerD2[i + queenRow] - 1);
-        if(conflicts > 0 ) {
+        queenRow = &nQueens[i];
+        if(queensPerRow[*queenRow] > 1  || queensPerD1[(i - *queenRow)+ (rows-1)] > 1 || queensPerD2[i + *queenRow] > 1) {
             return true;
         }
     }
@@ -96,7 +93,6 @@ bool hasConflicts() {
 }  
 
 void intialize() {
-    srand(time(0));
     int row;
 
     memset(queensPerRow, 0, rows*sizeof(*queensPerRow));
@@ -104,14 +100,16 @@ void intialize() {
     memset(queensPerD2,0, (2*rows-1)*sizeof(*queensPerD2));
 
     int pos = rand() % rows;
+
     nQueens[0] = pos;
     queensPerRow[pos]++;
     queensPerD1[ 0 - pos + (rows - 1)]++;
     queensPerD2[0 + pos]++;
+
     for(int i = 1 ; i < rows; i++ ) {
         row = getRowWithMinConflicts(i);
+
         nQueens[i] = row;
-        // cout << "Row with min conflicts: " << row << endl; 
         queensPerRow[row]++;
         queensPerD1[ i - row + (rows - 1)]++;
         queensPerD2[i + row]++;
@@ -127,11 +125,12 @@ void solve() {
     int col = 0;
     int row = 0;
     int prevRow;
-
+    srand(time(NULL));
     nQueens = new int[rows];
     queensPerRow = new int[rows]{0};
     queensPerD1 = new int[2*rows-1]{0};
     queensPerD2 = new int[2*rows-1]{0};
+    
     for(int k = 1; true; k++) {
        
         intialize();
@@ -165,13 +164,15 @@ void solve() {
 
 int main() {
     cin >> rows;
-    nQueens = new int[rows];
-    queensPerRow = new int[rows]{0};
-    queensPerD1 = new int[2*rows-1]{0};
-    queensPerD2 = new int[2*rows-1]{0};
-    intialize();
-    print();
-    // solve();
+    // nQueens = new int[rows];
+    // queensPerRow = new int[rows]{0};
+    // queensPerD1 = new int[2*rows-1]{0};
+    // queensPerD2 = new int[2*rows-1]{0};
+    // intialize();
     // print();
+    solve();
+    if(rows < 10) {
+        print();
+    }
     return 0;
 }
