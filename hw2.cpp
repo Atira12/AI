@@ -1,9 +1,7 @@
 #include <iostream>
-#include <cstdlib>
-#include <time.h>
 #include <string.h>
-
-using namespace std;
+#include <random>
+#include <chrono>  
 
 int* nQueens = nullptr;
 int* queensPerRow = nullptr;
@@ -11,31 +9,36 @@ int* queensPerD1 = nullptr;
 int* queensPerD2 = nullptr;
 int rows; 
 
+std::random_device rd; 
+std::mt19937 gen(rd());
+std::uniform_int_distribution<int> booleanDistribution(0, 1);
+
 void print() {
+
     for(int i = 0; i < rows; i++ ) {
         for(int j = 0; j < rows; j++ ) {
             if(i == nQueens[j]) {
-                cout << " . ";
+                std::cout << " + ";
             }else {
-                cout << " _ ";
+                std::cout << " - ";
             }
         }    
-        cout << endl;
+        std::cout << std::endl;
     }
-    for(int j = 0; j < rows; j++ ) {
-        cout << queensPerRow[j] << endl;
+    std::cout << std::endl;
+   /*  for(int j = 0; j < rows; j++ ) {
+        std::cout << queensPerRow[j] << std::endl;
     }   
-    cout << endl;
+    std::cout << std::endl;
     for(int j = 0; j < 2*rows-1; j++ ) {
-        cout << queensPerD1[j] << endl;
+        std::cout << queensPerD1[j] << std::endl;
     }  
-    cout << endl;
+    std::cout << std::endl;
 
     for(int j = 0; j < 2*rows-1; j++ ) {
-        cout << queensPerD2[j] << endl;
-    }  
+        std::cout << queensPerD2[j] << std::endl;
+    }   */
 }
-
 int getColWithMaxConflicts() {
     int maxCol = 0;
     int maxConflicts = 0;
@@ -48,7 +51,7 @@ int getColWithMaxConflicts() {
             maxConflicts = conflicts;
             maxCol = i;
         } else if( conflicts == maxConflicts) {
-            isTaken = rand() % 2;
+            isTaken = booleanDistribution(gen);
             if(isTaken) {
                 maxCol = i;    
             } 
@@ -56,16 +59,16 @@ int getColWithMaxConflicts() {
     }
     return maxCol;
 }
+
 int getRowWithMinConflicts(int col) {
     int conflicts;
     int minRow = 0;
     int minConflicts = rows;
-    int queenRow = nQueens[col];
     bool isTaken;
 
 
     for(int row = 0; row < rows; row++) {
-        if(row  == queenRow) {
+        if(row  == nQueens[col]) {
             continue;
         }
         conflicts  = (queensPerRow[row] - 1) + (queensPerD1[col - row + (rows - 1)] - 1) + (queensPerD2[col + row] - 1);
@@ -73,7 +76,7 @@ int getRowWithMinConflicts(int col) {
             minConflicts = conflicts;
             minRow = row;
         } else if( conflicts == minConflicts) {
-            isTaken = rand() % 2;
+            isTaken = booleanDistribution(gen);
              if(isTaken) {
                 minRow = row;    
             }
@@ -83,9 +86,10 @@ int getRowWithMinConflicts(int col) {
 }
 bool hasConflicts() {
     int* queenRow = nullptr;
+    
     for(int i = 0 ; i < rows ; i++) {
         queenRow = &nQueens[i];
-        if(queensPerRow[*queenRow] > 1  || queensPerD1[(i - *queenRow)+ (rows-1)] > 1 || queensPerD2[i + *queenRow] > 1) {
+        if(queensPerRow[*queenRow] != 1  || queensPerD1[(i - *queenRow)+ (rows-1)] > 1 || queensPerD2[i + *queenRow] > 1) {
             return true;
         }
     }
@@ -93,21 +97,9 @@ bool hasConflicts() {
 }  
 
 void intialize() {
-    int row;
-
-    memset(queensPerRow, 0, rows*sizeof(*queensPerRow));
-    memset(queensPerD1,0, (2*rows-1)*sizeof(*queensPerD1));
-    memset(queensPerD2,0, (2*rows-1)*sizeof(*queensPerD2));
-
-    int pos = rand() % rows;
-
-    nQueens[0] = pos;
-    queensPerRow[pos]++;
-    queensPerD1[ 0 - pos + (rows - 1)]++;
-    queensPerD2[0 + pos]++;
-
-    for(int i = 1 ; i < rows; i++ ) {
-        row = getRowWithMinConflicts(i);
+    srand(time(NULL));
+    for(int i = 0 ; i < rows; i++ ) {
+        int row = rand() % rows;
 
         nQueens[i] = row;
         queensPerRow[row]++;
@@ -118,31 +110,31 @@ void intialize() {
 void printWithWaiting() {
     int p;
     print();
-    cout << "------------------------------------------------" <<endl;
-    cin >> p;
+    std::cout << "------------------------------------------------" << std::endl;
+    std::cin >> p;
 }
 void solve() {
     int col = 0;
     int row = 0;
-    int prevRow;
-    srand(time(NULL));
+    int* prevRow = nullptr;
+
     nQueens = new int[rows];
-    queensPerRow = new int[rows]{0};
-    queensPerD1 = new int[2*rows-1]{0};
-    queensPerD2 = new int[2*rows-1]{0};
+    queensPerRow = new int[rows];
+    queensPerD1 = new int[2*rows-1];
+    queensPerD2 = new int[2*rows-1];
     
-    for(int k = 1; true; k++) {
+    for(int k = 1; k < rows; k++) {
        
         intialize();
-        for(int i = 0; i < k*rows; i++) {
+        for(int i = 0; i <= k*rows; i++) {
             col = getColWithMaxConflicts();
             row = getRowWithMinConflicts(col);
 
             // remove one queen from possition and conflicts
-            prevRow = nQueens[col];
-            queensPerRow[prevRow] --;
-            queensPerD1[((col - prevRow) + (rows - 1))]-- ;
-            queensPerD2[col+prevRow]--;
+            prevRow = &nQueens[col];
+            queensPerRow[*prevRow] --;
+            queensPerD1[((col - *prevRow) + (rows - 1))]-- ;
+            queensPerD2[col+*prevRow]--;
             // add one queen to new possition and new conflicts
             queensPerRow[row]++;
             queensPerD1[((col - row) + (rows - 1))]++ ;
@@ -150,28 +142,32 @@ void solve() {
             nQueens[col] = row;
             // printWithWaiting();
             if(!hasConflicts()) {
-                cout << "Right here" <<endl;
+                std::cout << "Right here" << std::endl;
                 return;
             }
         }
-        if(!hasConflicts()) {
-            cout << "Right here 2" <<endl;
-            return;
-        }
+        memset(queensPerRow, 0, rows*sizeof(int));
+        memset(queensPerD1, 0, (2*rows-1)*sizeof(int));
+        memset(queensPerD2, 0, (2*rows-1)*sizeof(int));
+
     }
-    cout << "COnflicts" << endl;
+    std::cout << "Conflicts" << std::endl;
 }
 
 int main() {
-    cin >> rows;
+    std:: cin >> rows;
     // nQueens = new int[rows];
     // queensPerRow = new int[rows]{0};
     // queensPerD1 = new int[2*rows-1]{0};
     // queensPerD2 = new int[2*rows-1]{0};
     // intialize();
     // print();
+    auto start = std::chrono::steady_clock::now();
     solve();
-    if(rows < 10) {
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std:: cout << "Time: " << elapsed_seconds.count() << std::endl;
+    if(rows < 20) {
         print();
     }
     return 0;
