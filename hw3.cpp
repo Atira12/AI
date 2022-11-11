@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 using namespace std;
 
 
@@ -18,11 +19,11 @@ int itemCount;
 int valueSum = 0;
 int maxWight;
 Pair** items = nullptr;
-const int populationCount = 700;
-const int oldPopulationSelected = 0.2 * populationCount;
+const int populationCount = 6700; // 300 
+const int oldPopulationSelected = 0.4 * populationCount;
 const int childrenCount = populationCount - oldPopulationSelected;
-const int mutationCount = 20;
-const int improvementThreshold = 200;
+const int mutationCount = 400; // 20
+const int improvementThreshold = 500 ; // 200
 bool** population = nullptr;
 int* fitness = nullptr;
 int** selected = nullptr;
@@ -81,6 +82,9 @@ void selection() {
         population[i] = population[maxIndex];
         population[maxIndex] = swapIndex;
     }
+    swapIndex = population[oldPopulationSelected-1];
+    population[oldPopulationSelected-1] = population[childrenCount];
+    population[childrenCount] = swapIndex;
 }
 void crossover() {
     bool probability1;
@@ -133,14 +137,14 @@ void solve() {
     init();
     for(int i = 1 ;i < 10000;i++) {
         fitnessFunc();
-         
-        if(fitness[0] <= bestValue) {
+        selection();
+         if(fitness[0] <= bestValue) {
             thresholdCount++;          
         } else {
             thresholdCount = 0;
             bestValue = fitness[0];
         }
-        if(i == 10 || i == 15 ||i == 20 ||i == 30 ) {
+        if(i == 10 || i == improvementThreshold / 4 ||i == improvementThreshold / 3 ||i == improvementThreshold / 2 ) {
             cout <<fitness[0] << endl;
         }
         if(thresholdCount >= improvementThreshold) {
@@ -149,78 +153,11 @@ void solve() {
             cout << fitness[0] << endl;
             return;
         }
-        selection();
-        
-        
         crossover();
-           
         mutation();
-
-        
     }
 }
-/* void solve() {
-    int bestValue = 0;
-    int thresholdCount = 0;
-    int t;
 
-    init();
-    for(int i = 1 ;i < 10000;i++) {
-        fitnessFunc();
-        if(fitness[0] <= bestValue) {
-            thresholdCount++;          
-        } else {
-            thresholdCount = 0;
-            bestValue = fitness[0];
-        }
-        if(i == 10 || i == 15 ||i == 20 ||i == 30 ) {
-            cout <<fitness[0] << endl;
-        }
-        if(thresholdCount == improvementThreshold) {
-            cout << "Threshold reacted: "  << i << endl;
-            break;
-        }
-        for(int i = 0 ; i< populationCount;i++) {
-            for(int j = 0 ; j< itemCount;j++) {
-                cout << population[i][j] << ' ';
-            }
-            cout << "fitness = " << fitness[i] << endl;
-            cout << endl;
-        }
-        cout << "--------------------------------" << endl;
-        selection();
-             for(int i = 0 ; i< populationCount;i++) {
-            for(int j = 0 ; j< itemCount;j++) {
-                cout << population[i][j] << ' ';
-            }
-            cout << "fitness = " << fitness[i] << endl;
-            cout << endl;
-        }
-        cout << "--------------------------------" << endl;
-        crossover();
-             for(int i = 0 ; i< populationCount;i++) {
-            for(int j = 0 ; j< itemCount;j++) {
-                cout << population[i][j] << ' ';
-            }
-            cout << "fitness = " << fitness[i] << endl;
-            cout << endl;
-        }
-        cout << "--------------------------------" << endl;
-        mutation();
-             for(int i = 0 ; i< populationCount;i++) {
-            for(int j = 0 ; j< itemCount;j++) {
-                cout << population[i][j] << ' ';
-            }
-            cout << "fitness = " << fitness[i] << endl;
-            cout << endl;
-        }
-        cout << "--------------------------------" << endl;
-        cin >> t;
-
-        
-    }
-    cout << fitness[0] << endl;
-} */
 int main() {
      cin >> maxWight;
     cin >> itemCount;
@@ -234,8 +171,14 @@ int main() {
         valueSum += value;
     }
     fitness = new int[populationCount];
+    
+    auto start = std::chrono::steady_clock::now();
     solve();
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
 }
+
 /* int main () {
 
     cin >> maxWight;
