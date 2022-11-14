@@ -86,31 +86,38 @@ void selection() {
     population[oldPopulationSelected-1] = population[childrenCount];
     population[childrenCount] = swapIndex;
 }
-void crossover() {
+
+void crossover2() {
     bool probability1;
     bool probability2;
     int p1Index = 0;
     int p2Index = 0;
     bool take;
+    int offsprintCount = 0;
     bool** children = new bool*[childrenCount];
     for(int i = 0 ; i < childrenCount; i++) {
         children[i] = new bool[itemCount];
     }
-    for(int i = 0; i < childrenCount; i++ ) {
+    while(offsprintCount < childrenCount ) {
             p1Index = rand() % oldPopulationSelected;
             p2Index = rand() % oldPopulationSelected;
             if(p1Index == p2Index) {
-                i = i - 1;
+                continue;
+            }
+            probability1 = rand() % 100 < (float(fitness[p1Index])/valueSum * 100);
+            probability2 = rand() % 100 < (float(fitness[p2Index])/valueSum * 100);
+            if(!probability1 || !probability2) {
                 continue;
             }
             for(int j = 0; j < itemCount;j++) {
                 take = rand() % 2;
                 if(take) {
-                    children[i][j] = population[p1Index][j]; 
+                    children[offsprintCount][j] = population[p1Index][j]; 
                 } else {
-                    children[i][j] = population[p2Index][j]; 
+                    children[offsprintCount][j] = population[p2Index][j]; 
                 }
             }
+            offsprintCount++;
 
     }
     for(int i = 0; i < childrenCount;i++) {
@@ -153,7 +160,7 @@ void solve() {
             cout << fitness[0] << endl;
             return;
         }
-        crossover();
+        crossover2();
         mutation();
     }
 }
