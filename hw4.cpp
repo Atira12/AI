@@ -1,8 +1,4 @@
 #include <iostream>
-#include <list>
-#include <array>
-#include <string.h>
-#include <algorithm> 
 #include <vector>
 
 using namespace std;
@@ -11,293 +7,221 @@ using namespace std;
 #define	DRAW 0
 #define LOSS INT32_MIN
 
-#define AI_MARKER 'O'
-#define PLAYER_MARKER 'X'
-#define EMPTY_SPACE '-'
+#define AI 'O'
+#define PLR 'X'
+#define EMPTY '-'
 
-void print_board(char board[3][3])
+void printBoard(char board[3][3])
 {
-	cout << endl;
-	cout << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << endl;
-	cout << "----------" << endl;
-	cout << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << endl;
-	cout << "----------" << endl;
-	cout << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl << endl;
+	for(int i = 0; i < 3;i++) {
+		for(int j = 0; j < 3 ;j++) {
+			cout << ' ' << board[i][j] << ' ';
+		}
+		cout <<endl;
+		if(i != 2) {
+			cout << " -------" << endl;
+		}
+	}
+		cout <<endl;
+		cout <<endl;
+
 }
 
-std::vector<std::pair<int, int>> get_legal_moves(char board[3][3])
-{
-	std::vector<std::pair<int, int>> legal_moves;
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			if (board[i][j] != AI_MARKER && board[i][j] != PLAYER_MARKER)
-			{
-				legal_moves.push_back(std::make_pair(i, j));
+vector<pair<int,int>> getSuccessorMoves(char board[3][3]) {
+	vector<pair<int,int>> moves;
+	for(int i = 0;i < 3;i++) {
+		for(int j = 0 ; j < 3 ;j++ ) {
+			if(board[i][j] == EMPTY) {
+				moves.push_back(make_pair(i,j));
 			}
 		}
 	}
-
-	return legal_moves;
-}
-bool board_is_full(char board[3][3])
-{
-	std::vector<std::pair<int, int>> legal_moves = get_legal_moves(board);
-
-	if (0 == legal_moves.size())
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-std::vector<std::vector<std::pair<int, int>>> winning_states
-{
-	// Every row
-	{ std::make_pair(0, 0), std::make_pair(0, 1), std::make_pair(0, 2) },
-	{ std::make_pair(1, 0), std::make_pair(1, 1), std::make_pair(1, 2) },
-	{ std::make_pair(2, 0), std::make_pair(2, 1), std::make_pair(2, 2) },
-
-	// Every column
-	{ std::make_pair(0, 0), std::make_pair(1, 0), std::make_pair(2, 0) },
-	{ std::make_pair(0, 1), std::make_pair(1, 1), std::make_pair(2, 1) },
-	{ std::make_pair(0, 2), std::make_pair(1, 2), std::make_pair(2, 2) },
-
-	// Every diagonal
-	{ std::make_pair(0, 0), std::make_pair(1, 1), std::make_pair(2, 2) },
-	{ std::make_pair(2, 0), std::make_pair(1, 1), std::make_pair(0, 2) }
-
-};
-bool game_is_won(std::vector<std::pair<int, int>> occupied_positions)
-{
-	bool game_won;
-
-	for (int i = 0; i < winning_states.size(); i++)
-	{
-		game_won = true;
-		std::vector<std::pair<int, int>> curr_win_state = winning_states[i];
-		for (int j = 0; j < 3; j++)
-		{
-			if (!(std::find(std::begin(occupied_positions), std::end(occupied_positions), curr_win_state[j]) != std::end(occupied_positions)))
-			{
-				game_won = false;
-				break;
-			}
-		}
-
-		if (game_won)
-		{
-			break;
-		}
-	}
-	return game_won;
+	return moves;
 }
 
-char get_opponent_marker(char marker)
-{
-	char opponent_marker;
-	if (marker == PLAYER_MARKER)
-	{
-		opponent_marker = AI_MARKER;
-	}
-	else
-	{
-		opponent_marker = PLAYER_MARKER;
-	}
-
-	return opponent_marker;
-}
-std::vector<std::pair<int, int>> get_occupied_positions(char board[3][3], char marker)
-{
-	std::vector<std::pair<int, int>> occupied_positions;
-
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			if (marker == board[i][j])
-			{
-				occupied_positions.push_back(std::make_pair(i, j));
-			}
-		}
-	}
-
-	return occupied_positions;
-}
-int get_board_state(char board[3][3], char marker)
-{
-
-	char opponent_marker = get_opponent_marker(marker);
-
-	std::vector<std::pair<int, int>> occupied_positions = get_occupied_positions(board, marker);
-
-	bool is_won = game_is_won(occupied_positions);
-
-	if (is_won)
-	{
-		return WIN;
-	}
-
-	occupied_positions = get_occupied_positions(board, opponent_marker);
-	bool is_lost = game_is_won(occupied_positions);
-
-	if (is_lost)
-	{
-		return LOSS;
-	}
-
-	bool is_full = board_is_full(board);
-	if (is_full)
-	{
-		return DRAW;
-	}
-
-	return DRAW;
-
-}
-
-int hasWinner(char board[3][3]) {
+int isTerminated(char board[3][3]) {
 	for(int i = 0; i < 3; i++) {
-			if(board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != EMPTY_SPACE) {
+			if(board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != EMPTY) {
 				return true;
 			}
 	}
 	for(int i = 0; i < 3; i++) {
-			if(board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != EMPTY_SPACE) {
+			if(board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != EMPTY) {
 				return true;
 			}
 	}
-	if(board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != EMPTY_SPACE) {
+	if(board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != EMPTY) {
 		return true;
 	}
-	if(board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != EMPTY_SPACE) {
+	if(board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != EMPTY) {
 		return true;
 	}
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			if(board[i][j] == EMPTY_SPACE) {
+			if(board[i][j] == EMPTY) {
 				return false;
 			}
 		}
 	}
 	return true;
 } 
-std::pair<int, std::pair<int, int>> minValue(char board[3][3], char marker, int depth, int alpha, int beta) ;
-std::pair<int, std::pair<int, int>>  maxValue(char board[3][3], char marker, int depth, int alpha, int beta)  {
-    std::pair<int, int> best_move = std::make_pair(NULL,NULL);
-    int best_score = LOSS ;
-	if (hasWinner(board))
-	{
-		best_score = get_board_state(board, AI_MARKER);
-		return std::make_pair(best_score, best_move);
+int getEndState(char board[3][3], char symbol) {
+
+		for(int i = 0; i < 3; i++) {
+				if(board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != EMPTY) {
+					 if( symbol == AI) {
+						return board[0][i] == symbol ? WIN : LOSS;
+					 } else {
+						return board[0][i] == symbol ? LOSS : WIN;
+					 }
+				}
+				
+		}
+		for(int i = 0; i < 3; i++) {
+				if(board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != EMPTY) {
+					if( symbol == AI) {
+						return board[i][0] == symbol ? WIN : LOSS;
+					 } else {
+						return board[i][0] == symbol ? LOSS : WIN;
+					 }
+				}
+		}
+		if(board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != EMPTY) {
+					 if( symbol == AI) {
+						return board[0][0] == symbol ? WIN : LOSS;
+					 } else {
+						return board[0][0] == symbol ? LOSS : WIN;
+					 }
+		}
+		if(board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != EMPTY) {
+					  if( symbol == AI) {
+						return board[0][2] == symbol ? WIN : LOSS;
+					 } else {
+						return board[0][2] == symbol ? LOSS : WIN;
+					 }
+		}
+		return DRAW;
+	
+}
+std::pair<int, std::pair<int, int>> minValue(char board[3][3], char symbol, int depth, int alpha, int beta) ;
+std::pair<int, std::pair<int, int>>  maxValue(char board[3][3], char symbol, int depth, int alpha, int beta)  {
+    std::pair<int, int> bestMove = std::make_pair(-1, -1);
+    int bestValue = LOSS ;
+
+	if (isTerminated(board))
+	{	
+		bestValue = getEndState(board, AI);
+		return std::make_pair(bestValue, bestMove);
 	}
-	std::vector<std::pair<int, int>> legal_moves = get_legal_moves(board);
+	std::vector<std::pair<int, int>> legal_moves = getSuccessorMoves(board);
 
 	for (int i = 0; i < legal_moves.size(); i++)
 	{
-		std::pair<int, int> curr_move = legal_moves[i];
-		board[curr_move.first][curr_move.second] = marker;
+		std::pair<int, int> curMove = legal_moves[i];
+		board[curMove.first][curMove.second] = symbol;
 
-		// Maximizing player's turn
-			int score = minValue(board,PLAYER_MARKER, depth + 1, alpha, beta).first;
+		
+			int newScore = minValue(board,PLR, depth + 1, alpha, beta).first;
 
-			// Get the best scoring move
-			if (best_score < score)
+			
+			if (bestValue < newScore)
 			{
-				best_score = score - depth*10;
-				best_move = curr_move;
+				bestValue = newScore - depth*10;
+				bestMove = curMove;
 					
-				// Check if this branch's best move is worse than the best
-				// option of a previously search branch. If it is, skip it
-				alpha = std::max(alpha, best_score);
-				board[curr_move.first][curr_move.second] = EMPTY_SPACE;
+				
+				
+				alpha = std::max(alpha, bestValue);
+				board[curMove.first][curMove.second] = EMPTY;
 				if (alpha >= beta) 
 				{ 
 					break; 
 				}
 			}
-		board[curr_move.first][curr_move.second] = EMPTY_SPACE; // Undo move
+		board[curMove.first][curMove.second] = EMPTY; 
 
 	}
-	return std::make_pair(best_score, best_move);
+	return std::make_pair(bestValue, bestMove);
 }
 
 
 
 
-std::pair<int, std::pair<int, int>> minValue(char board[3][3], char marker, int depth, int alpha, int beta)  {
-    std::pair<int, int> best_move = std::make_pair(-1, -1);
-    int best_score = WIN;
+std::pair<int, std::pair<int, int>> minValue(char board[3][3], char symbol, int depth, int alpha, int beta)  {
+    std::pair<int, int> bestMove = std::make_pair(-1, -1);
+    int bestValue = WIN;
 
-	if (hasWinner(board))
+	if (isTerminated(board))
 	{
-		best_score = get_board_state(board,AI_MARKER);
-		return std::make_pair(best_score, best_move);
+		bestValue = getEndState(board,PLR);
+		return std::make_pair(bestValue, bestMove);
 	}
-    std::vector<std::pair<int, int>> legal_moves = get_legal_moves(board);
+    std::vector<std::pair<int, int>> legal_moves = getSuccessorMoves(board);
 
 	for (int i = 0; i < legal_moves.size(); i++){
-		std::pair<int, int> curr_move = legal_moves[i];
-		board[curr_move.first][curr_move.second] = marker;
+		std::pair<int, int> curMove = legal_moves[i];
+		board[curMove.first][curMove.second] = symbol;
 
-		// Maximizing player's turn
-			int score = maxValue(board, AI_MARKER, depth + 1, alpha, beta).first;
 		
-			// Get the best scoring move
-			if (best_score > score)
+			int newScore = maxValue(board, AI, depth + 1, alpha, beta).first;
+		
+			
+			if (bestValue > newScore)
 			{
-				best_score = score +  depth* 10;
-				best_move = curr_move;
+				bestValue = newScore + depth* 10;
+				bestMove = curMove;
 
-				// Check if this branch's best move is worse than the best
-				// option of a previously search branch. If it is, skip it
-				beta = std::min(beta, best_score);
-				board[curr_move.first][curr_move.second] = EMPTY_SPACE;
-				if (beta <= alpha) 
+				
+				
+				beta = std::min(beta, bestValue);
+				board[curMove.first][curMove.second] = EMPTY;
+				if (alpha >= beta) 
 				{ 
 					break; 
 				}
 			}
 			
-		board[curr_move.first][curr_move.second] = EMPTY_SPACE; // Undo move
+		board[curMove.first][curMove.second] = EMPTY; 
 			
     }
-	return std::make_pair(best_score, best_move);
+	return std::make_pair(bestValue, bestMove);
 }
 
 
 int main () {
-	char board[3][3] = { EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE};
+	char board[3][3] = { EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY};
 	bool playerFirst;
 	int row;
 	int col;
 	bool whoFirst;
+
 	cout << "Player first - 1 || AI first - 0" << endl;
 	cin >> whoFirst;
-	print_board(board);
+	printBoard(board);
 	if(whoFirst) {
-		while(!hasWinner(board)) {
+		while(!isTerminated(board)) {
+			cout << "row: ";
 			cin >> row;
+			cout << "col: ";
 			cin >> col;
-			board[row][col] = PLAYER_MARKER;
-			std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI_MARKER, 0, LOSS, WIN);
-			board[ai_move.second.first][ai_move.second.second] = AI_MARKER;
-			print_board(board);
+			board[row][col] = PLR;
+			std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI, 0, LOSS, WIN);
+			board[ai_move.second.first][ai_move.second.second] = AI;
+			printBoard(board);
 		}	
 	} else {
-		while(!hasWinner(board)) {
-			std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI_MARKER, 0, LOSS, WIN);
-			board[ai_move.second.first][ai_move.second.second] = AI_MARKER;
-			print_board(board);
-			if(hasWinner(board)) {
-				break;
-			}
-			cin >> row;
-			cin >> col;
-			board[row][col] = PLAYER_MARKER;
+		while(!isTerminated(board)) {
+		std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI, 0, LOSS, WIN);
+		board[ai_move.second.first][ai_move.second.second] = AI;
+		printBoard(board);
+		if(isTerminated(board)) {
+			break;
+		}
+		cout << "row: ";
+		cin >> row;
+		cout << "col: ";
+		cin >> col;
+		board[row][col] = PLR;
 		}
 	}
 	
