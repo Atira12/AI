@@ -158,7 +158,8 @@ int get_board_state(char board[3][3], char marker)
 	return DRAW;
 
 }
-bool isEnd(char board[3][3]) {
+
+int hasWinner(char board[3][3]) {
 	for(int i = 0; i < 3; i++) {
 			if(board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != EMPTY_SPACE) {
 				return true;
@@ -184,89 +185,11 @@ bool isEnd(char board[3][3]) {
 	}
 	return true;
 } 
-int getUtility(char board[3][3], char marker) {
-	int score = 0;
-	for(int i = 0; i < 3 ;i ++ ) {
-			if(board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] == marker ) {
-				score+=10;
-			} else if(board[i][0] == board[i][1] && EMPTY_SPACE == board[i][2] && board[i][0] == marker ) {
-				score +=4;
-			} else if(board[i][0] == board[i][1] && EMPTY_SPACE == board[i][2] && board[i][0] == marker ) {
-				score+=4;
-			} else if(board[i][0] == EMPTY_SPACE &&  board[i][1]== board[i][2] && board[i][1] == marker ) {
-				score +=4;
-			} else if(board[i][1] == EMPTY_SPACE &&  board[i][0]== board[i][2] && board[i][0] == marker ) {
-				score+=4;
-			} else if(board[i][1] == EMPTY_SPACE &&  board[i][1]== board[i][2] && board[i][0] == marker ) {
-				score+=1;
-			} else if(board[i][0] == EMPTY_SPACE &&  board[i][0]== board[i][2] && board[i][1] == marker ) {
-				score+=1;
-			} else if(board[i][0] == EMPTY_SPACE &&  board[i][0]== board[i][1] && board[i][2] == marker ) {
-				score+=1;
-			}
-
-			if(board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] == marker ) {
-				score+=10;
-			} else if(board[0][i] == board[1][i] && EMPTY_SPACE == board[2][i] && board[0][i] == marker ) {
-				score +=4;
-			} else if(board[0][i] == board[1][i] && EMPTY_SPACE == board[2][i] && board[0][i] == marker ) {
-				score+=4;
-			} else if(board[0][i] == EMPTY_SPACE &&  board[1][i]== board[2][i] && board[1][i] == marker ) {
-				score +=4;
-			} else if(board[1][i] == EMPTY_SPACE &&  board[0][i]== board[2][i] && board[0][i] == marker ) {
-				score+=4;
-			} else if(board[1][i] == EMPTY_SPACE &&  board[1][i]== board[2][i] && board[0][i] == marker ) {
-				score+=1;
-			} else if(board[0][i] == EMPTY_SPACE &&  board[0][i]== board[2][i] && board[1][i] == marker ) {
-				score+=1;
-			} else if(board[0][i] == EMPTY_SPACE &&  board[0][i]== board[1][i] && board[2][i] == marker ) {
-				score+=1;
-			}
-
-	}
-
-		if(board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] == marker ) {
-			score+=10;
-		} else if(board[0][0] == board[1][1] && EMPTY_SPACE == board[2][2] && board[0][0] == marker ) {
-			score +=4;
-		} else if(board[0][0] == board[1][1] && EMPTY_SPACE == board[2][2] && board[0][0] == marker ) {
-			score+=4;
-		} else if(board[0][0] == EMPTY_SPACE &&  board[1][1]== board[2][2] && board[1][1] == marker ) {
-			score +=4;
-		} else if(board[1][1] == EMPTY_SPACE &&  board[0][0]== board[2][2] && board[0][0] == marker ) {
-			score+=4;
-		} else if(board[1][1] == EMPTY_SPACE &&  board[1][1]== board[2][2] && board[0][0] == marker ) {
-			score+=1;
-		} else if(board[0][0] == EMPTY_SPACE &&  board[0][0]== board[2][2] && board[1][1] == marker ) {
-			score+=1;
-		} else if(board[0][0] == EMPTY_SPACE &&  board[0][0]== board[1][1] && board[2][2] == marker ) {
-			score+=1;
-		}
-
-		if(board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] == marker ) {
-			score+=10;
-		} else if(board[0][2] == board[1][1] && EMPTY_SPACE == board[2][0] && board[0][2] == marker ) {
-			score +=4;
-		} else if(board[0][2] == board[1][1] && EMPTY_SPACE == board[2][0] && board[0][2] == marker ) {
-			score+=4;
-		} else if(board[0][2] == EMPTY_SPACE &&  board[1][1]== board[2][0] && board[1][1] == marker ) {
-			score +=4;
-		} else if(board[1][1] == EMPTY_SPACE &&  board[0][2]== board[2][0] && board[0][2] == marker ) {
-			score+=4;
-		} else if(board[1][1] == EMPTY_SPACE &&  board[1][1]== board[2][0] && board[0][2] == marker ) {
-			score+=1;
-		} else if(board[0][2] == EMPTY_SPACE &&  board[0][2]== board[2][0] && board[1][1] == marker ) {
-			score+=1;
-		} else if(board[0][2] == EMPTY_SPACE &&  board[0][2]== board[1][1] && board[2][0] == marker ) {
-			score+=1;
-		}
-		return marker == AI_MARKER ? score : (score * -1);
-}
 std::pair<int, std::pair<int, int>> minValue(char board[3][3], char marker, int depth, int alpha, int beta) ;
 std::pair<int, std::pair<int, int>>  maxValue(char board[3][3], char marker, int depth, int alpha, int beta)  {
-    std::pair<int, int> best_move = std::make_pair(-1, -1);
+    std::pair<int, int> best_move = std::make_pair(NULL,NULL);
     int best_score = LOSS ;
-	if (isEnd(board))
+	if (hasWinner(board))
 	{
 		best_score = get_board_state(board, AI_MARKER);
 		return std::make_pair(best_score, best_move);
@@ -309,7 +232,7 @@ std::pair<int, std::pair<int, int>> minValue(char board[3][3], char marker, int 
     std::pair<int, int> best_move = std::make_pair(-1, -1);
     int best_score = WIN;
 
-	if (isEnd(board))
+	if (hasWinner(board))
 	{
 		best_score = get_board_state(board,AI_MARKER);
 		return std::make_pair(best_score, best_move);
@@ -351,13 +274,31 @@ int main () {
 	bool playerFirst;
 	int row;
 	int col;
+	bool whoFirst;
+	cout << "Player first - 1 || AI first - 0" << endl;
+	cin >> whoFirst;
 	print_board(board);
-	while(!isEnd(board)) {
-		cin >> row;
-		cin >> col;
-		board[row][col] = PLAYER_MARKER;
-		std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI_MARKER, 0, LOSS, WIN);
-		board[ai_move.second.first][ai_move.second.second] = AI_MARKER;
-		print_board(board);
+	if(whoFirst) {
+		while(!hasWinner(board)) {
+			cin >> row;
+			cin >> col;
+			board[row][col] = PLAYER_MARKER;
+			std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI_MARKER, 0, LOSS, WIN);
+			board[ai_move.second.first][ai_move.second.second] = AI_MARKER;
+			print_board(board);
+		}	
+	} else {
+		while(!hasWinner(board)) {
+			std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI_MARKER, 0, LOSS, WIN);
+			board[ai_move.second.first][ai_move.second.second] = AI_MARKER;
+			print_board(board);
+			if(hasWinner(board)) {
+				break;
+			}
+			cin >> row;
+			cin >> col;
+			board[row][col] = PLAYER_MARKER;
+		}
 	}
+	
 }
