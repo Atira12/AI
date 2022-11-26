@@ -5,7 +5,7 @@ using namespace std;
 
 #define WIN INT32_MAX
 #define	DRAW 0
-#define LOSS INT32_MIN
+#define LOSE INT32_MIN
 
 #define AI 'O'
 #define PLR 'X'
@@ -70,9 +70,9 @@ int getEndState(char board[3][3], char symbol) {
 		for(int i = 0; i < 3; i++) {
 				if(board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != EMPTY) {
 					 if( symbol == AI) {
-						return board[0][i] == symbol ? WIN : LOSS;
+						return board[0][i] == symbol ? WIN : LOSE;
 					 } else {
-						return board[0][i] == symbol ? LOSS : WIN;
+						return board[0][i] == symbol ? LOSE : WIN;
 					 }
 				}
 				
@@ -80,58 +80,58 @@ int getEndState(char board[3][3], char symbol) {
 		for(int i = 0; i < 3; i++) {
 				if(board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != EMPTY) {
 					if( symbol == AI) {
-						return board[i][0] == symbol ? WIN : LOSS;
+						return board[i][0] == symbol ? WIN : LOSE;
 					 } else {
-						return board[i][0] == symbol ? LOSS : WIN;
+						return board[i][0] == symbol ? LOSE : WIN;
 					 }
 				}
 		}
 		if(board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != EMPTY) {
 					 if( symbol == AI) {
-						return board[0][0] == symbol ? WIN : LOSS;
+						return board[0][0] == symbol ? WIN : LOSE;
 					 } else {
-						return board[0][0] == symbol ? LOSS : WIN;
+						return board[0][0] == symbol ? LOSE : WIN;
 					 }
 		}
 		if(board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != EMPTY) {
 					  if( symbol == AI) {
-						return board[0][2] == symbol ? WIN : LOSS;
+						return board[0][2] == symbol ? WIN : LOSE;
 					 } else {
-						return board[0][2] == symbol ? LOSS : WIN;
+						return board[0][2] == symbol ? LOSE : WIN;
 					 }
 		}
 		return DRAW;
 	
 }
-std::pair<int, std::pair<int, int>> minValue(char board[3][3], char symbol, int depth, int alpha, int beta) ;
-std::pair<int, std::pair<int, int>>  maxValue(char board[3][3], char symbol, int depth, int alpha, int beta)  {
-    std::pair<int, int> bestMove = std::make_pair(-1, -1);
-    int bestValue = LOSS ;
+pair<int, pair<int, int>> minValue(char board[3][3],int depth, int alpha, int beta) ;
+pair<int, pair<int, int>>  maxValue(char board[3][3], int depth, int alpha, int beta)  {
+    pair<int, int> bestMove = make_pair(-1, -1);
+    int bestScore = LOSE ;
 
 	if (isTerminated(board))
 	{	
-		bestValue = getEndState(board, AI);
-		return std::make_pair(bestValue, bestMove);
+		bestScore = getEndState(board, AI);
+		return make_pair(bestScore, bestMove);
 	}
-	std::vector<std::pair<int, int>> legal_moves = getSuccessorMoves(board);
+	vector<pair<int, int>> suc = getSuccessorMoves(board);
 
-	for (int i = 0; i < legal_moves.size(); i++)
+	for (int i = 0; i < suc.size(); i++)
 	{
-		std::pair<int, int> curMove = legal_moves[i];
-		board[curMove.first][curMove.second] = symbol;
+		pair<int, int> curMove = suc[i];
+		board[curMove.first][curMove.second] = AI;
 
 		
-			int newScore = minValue(board,PLR, depth + 1, alpha, beta).first;
+			int newScore = minValue(board, depth + 1, alpha, beta).first;
 
 			
-			if (bestValue < newScore)
+			if (bestScore < newScore)
 			{
-				bestValue = newScore - depth*10;
+				bestScore = newScore - depth*10;
 				bestMove = curMove;
 					
 				
 				
-				alpha = std::max(alpha, bestValue);
+				alpha = max(alpha, bestScore);
 				board[curMove.first][curMove.second] = EMPTY;
 				if (alpha >= beta) 
 				{ 
@@ -141,39 +141,39 @@ std::pair<int, std::pair<int, int>>  maxValue(char board[3][3], char symbol, int
 		board[curMove.first][curMove.second] = EMPTY; 
 
 	}
-	return std::make_pair(bestValue, bestMove);
+	return make_pair(bestScore, bestMove);
 }
 
 
 
 
-std::pair<int, std::pair<int, int>> minValue(char board[3][3], char symbol, int depth, int alpha, int beta)  {
-    std::pair<int, int> bestMove = std::make_pair(-1, -1);
-    int bestValue = WIN;
+pair<int, pair<int, int>> minValue(char board[3][3], int depth, int alpha, int beta)  {
+    pair<int, int> bestMove = make_pair(-1, -1);
+    int bestScore = WIN;
 
 	if (isTerminated(board))
 	{
-		bestValue = getEndState(board,PLR);
-		return std::make_pair(bestValue, bestMove);
+		bestScore = getEndState(board,PLR);
+		return make_pair(bestScore, bestMove);
 	}
-    std::vector<std::pair<int, int>> legal_moves = getSuccessorMoves(board);
+    vector<pair<int, int>> suc = getSuccessorMoves(board);
 
-	for (int i = 0; i < legal_moves.size(); i++){
-		std::pair<int, int> curMove = legal_moves[i];
-		board[curMove.first][curMove.second] = symbol;
+	for (int i = 0; i < suc.size(); i++){
+		pair<int, int> curMove = suc[i];
+		board[curMove.first][curMove.second] = PLR;
 
 		
-			int newScore = maxValue(board, AI, depth + 1, alpha, beta).first;
+			int newScore = maxValue(board, depth + 1, alpha, beta).first;
 		
 			
-			if (bestValue > newScore)
+			if (bestScore > newScore)
 			{
-				bestValue = newScore + depth* 10;
+				bestScore = newScore + depth* 10;
 				bestMove = curMove;
 
 				
 				
-				beta = std::min(beta, bestValue);
+				beta = min(beta, bestScore);
 				board[curMove.first][curMove.second] = EMPTY;
 				if (alpha >= beta) 
 				{ 
@@ -184,7 +184,7 @@ std::pair<int, std::pair<int, int>> minValue(char board[3][3], char symbol, int 
 		board[curMove.first][curMove.second] = EMPTY; 
 			
     }
-	return std::make_pair(bestValue, bestMove);
+	return make_pair(bestScore, bestMove);
 }
 
 
@@ -205,14 +205,14 @@ int main () {
 			cout << "col: ";
 			cin >> col;
 			board[row][col] = PLR;
-			std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI, 0, LOSS, WIN);
-			board[ai_move.second.first][ai_move.second.second] = AI;
+			pair<int, pair<int, int>> aiMove = maxValue(board, 0, LOSE, WIN);
+			board[aiMove.second.first][aiMove.second.second] = AI;
 			printBoard(board);
 		}	
 	} else {
 		while(!isTerminated(board)) {
-		std::pair<int, std::pair<int, int>> ai_move = maxValue(board, AI, 0, LOSS, WIN);
-		board[ai_move.second.first][ai_move.second.second] = AI;
+		pair<int, pair<int, int>> aiMove = maxValue(board, 0, LOSE, WIN);
+		board[aiMove.second.first][aiMove.second.second] = AI;
 		printBoard(board);
 		if(isTerminated(board)) {
 			break;
