@@ -5,7 +5,7 @@ library(caret)
 set.seed(777)
 
 # get data from csv
-voters <-  read.csv("test.data", header=FALSE, sep=",")
+voters <-  read.csv("house-votes-84.data", header=FALSE, sep=",")
 
 # training config
 df <- data.frame(laplace=1, usekernel=c(FALSE,TRUE),adjust=1)
